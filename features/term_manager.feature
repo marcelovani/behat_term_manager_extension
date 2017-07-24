@@ -8,19 +8,17 @@ Feature: Term Manager
   Scenario: Check that term manager works as expected.
     Given I create a taxonomy tree for testing term manager
 
-    Given I run the drush command "tm-create"
-     # Test resulting tree.
-    Then I run the drush command "tm-test-create"
-     # Run actions.
-    Given I run the drush command "tm-actions"
-     # Test resulting actions.
-    Given I run the drush command "tm-test-actions"
-     # Run dupe actions.
-    Given I run the drush command "tm-dupe-actions"
-     # Test resulting dupe actions.
-    Given I run the drush command "tm-test-dupe-actions"
-     # Clean up.
-    Then I run the drush command "tm-cleanup"
+    Given term manager runs "test_create_run.csv"
+    Then the term manager resulting tree should match "test_create_pass"
+
+    Given term manager runs "test_actions_run.csv"
+    Then the term manager resulting tree should match "test_actions_pass"
+
+    Given term manager runs the dupe actions
+    Then the term manager resulting tree should match "test_dupe_actions_pass"
+
+    Then I clean up the testing terms for term manager
+
 
   @api @seo @term_manager
   Scenario: Check that term manager works as expected working with nodes.
