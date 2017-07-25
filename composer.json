@@ -16,7 +16,7 @@
   },
   "autoload": {
     "psr-0": {
-      "Behat\\TermManagerExtension": "src/"
+      "DennisDigital\\TermManagerExtension": "src/"
     }
   },
   "extra": {
