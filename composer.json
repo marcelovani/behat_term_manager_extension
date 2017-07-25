@@ -1,5 +1,5 @@
 {
-  "name": "dennisdigital/term-manager-extension",
+  "name": "dennisdigital/behat-term-manager-extension",
   "type": "behat-extension",
   "description": "Term Manager extension for Behat",
   "keywords": ["term manager", "web", "test"],
