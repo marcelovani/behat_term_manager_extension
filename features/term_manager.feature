@@ -4,17 +4,17 @@ Feature: Term Manager
   As a SEO expert
   I want to upload a CSV file with bulk actions to be run against the taxonomy
 
-  @term_manager_self_test
+  @term_manager_self_test @tm
   Scenario: Check that term manager works as expected.
     Given I create a taxonomy tree for testing term manager
 
-    Given term manager runs "test_create_run.csv"
+    When term manager processes "test_create_run.csv"
     Then the term manager resulting tree should match "test_create_pass"
 
-    Given term manager runs "test_actions_run.csv"
+    When term manager processes "test_actions_run.csv"
     Then the term manager resulting tree should match "test_actions_pass"
 
-    Given term manager runs the dupe actions
+    When term manager processes dupe actions
     Then the term manager resulting tree should match "test_dupe_actions_pass"
 
     Then I clean up the testing terms for term manager

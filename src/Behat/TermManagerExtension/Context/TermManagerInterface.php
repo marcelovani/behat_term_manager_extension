@@ -1,6 +1,6 @@
 <?php
 
-namespace Behat\TermManagerExtension\Context;
+namespace DennisDigital\TermManagerExtension\Context;
 
 use Behat\Behat\Context\Context;
 
