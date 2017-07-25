@@ -2,6 +2,8 @@
 
 namespace DennisDigital\TermManagerExtension\Context;
 
+use Behat\Behat\Context\SnippetAcceptingContext;
+use Behat\Behat\Hook\Scope\BeforeScenarioScope;
 use Behat\Behat\Hook\Scope\BeforeStepScope;
 use Behat\MinkExtension\Context\RawMinkContext;
 
@@ -10,13 +12,30 @@ use Behat\MinkExtension\Context\RawMinkContext;
  *
  * @package Behat\TermManagerExtension\Context
  */
-class TermManagerContext extends RawMinkContext implements TermManagerInterface
+class TermManagerContext implements SnippetAcceptingContext
 {
+
+  private $drupalContext;
+
+  /**
+   * @BeforeScenario
+   *
+   * @param BeforeScenarioScope $scope
+   */
+  public function before(BeforeScenarioScope $scope) {
+    // Get the environment.
+    $environment = $scope->getEnvironment();
+
+    // Get all the contexts we need.
+    //$this->BDDCommonContext = $environment->getContext('Behat\BDDCommonExtension\Context\BDDCommonContext');
+    //$this->MinkContext = $environment->getContext('Drupal\DrupalExtension\Context\MinkContext');
+    $this->drupalContext = $environment->getContext('Drupal\DrupalExtension\Context\DrupalContext');
+  }
+
   public function __construct() {
-    parent::__construct;
 
     // Bootstrap drupal.
-    $this->getDriver()->getCore()->bootstrap();
+    //$this->getDriver()->getCore()->bootstrap();
   }
 
   /**
@@ -24,6 +43,9 @@ class TermManagerContext extends RawMinkContext implements TermManagerInterface
    */
   public function iCreateATaxonomyTreeForTestingTermManager()
   {
+    $this->drupalContext->getDriver('drupal')->getCore()->bootstrap();
+    //print_r(get_class_methods($this->drupalContext->getDriver()));
+
     dennis_term_manager_tests_create();
   }
 
@@ -32,7 +54,7 @@ class TermManagerContext extends RawMinkContext implements TermManagerInterface
    */
   public function termManagerProcesses($arg1)
   {
-    throw new PendingException();
+    //throw new PendingException();
   }
 
   /**
@@ -40,7 +62,7 @@ class TermManagerContext extends RawMinkContext implements TermManagerInterface
    */
   public function theTermManagerResultingTreeShouldMatch($arg1)
   {
-    throw new PendingException();
+    //throw new PendingException();
   }
 
   /**
@@ -48,7 +70,7 @@ class TermManagerContext extends RawMinkContext implements TermManagerInterface
    */
   public function termManagerProcessesDupeActions()
   {
-    throw new PendingException();
+    //throw new PendingException();
   }
 
   /**
@@ -56,6 +78,6 @@ class TermManagerContext extends RawMinkContext implements TermManagerInterface
    */
   public function iCleanUpTheTestingTermsForTermManager()
   {
-    throw new PendingException();
+    //throw new PendingException();
   }
 }
