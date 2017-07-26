@@ -36,12 +36,6 @@ class TermManagerContext implements SnippetAcceptingContext
     variable_set('dennis_term_manager_enabled', 1);
   }
 
-  public function __construct() {
-
-    // Bootstrap drupal.
-    //$this->getDriver()->getCore()->bootstrap();
-  }
-
   /**
    * Helper to clean up terms created during tests.
    */
@@ -69,8 +63,6 @@ class TermManagerContext implements SnippetAcceptingContext
    * @param $file
    */
   private function batch($file) {
-    $this->drupalContext->getDriver('drupal')->getCore()->bootstrap();
-
     // Initial cleanup of taxonomy tree and queue.
     $this->taxonomyCleanup();
     $this->queueCleanup('dennis_term_manager_queue');
