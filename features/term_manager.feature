@@ -6,7 +6,8 @@ Feature: Term Manager
 
   @term_manager_self_test @tm
   Scenario: Check that term manager works as expected.
-    Given I create a taxonomy tree for testing term manager
+    Given I create a taxonomy tree using "test_create_run.csv"
+    Then I check that the taxonomy tree matches the contents of "test_create_pass.csv"
 
     When term manager processes "test_create_run.csv"
     Then the term manager resulting tree should match "test_create_pass"

@@ -147,16 +147,41 @@ class TermManagerContext implements SnippetAcceptingContext
   }
 
   /**
-   * @Given I create a taxonomy tree for testing term manager
+   * @Given I create a taxonomy tree using :csv
    */
-  public function iCreateATaxonomyTreeForTestingTermManager()
+  public function iCreateATaxonomyTreeUsing($csv)
   {
-    $csv = 'test_create_run.csv';
     $file = realpath(dirname(__FILE__) . '/../Resources/' . $csv);
 
     $this->batch($file);
 
   }
+
+  /**
+   * @Then I check that the taxonomy tree matches the contents of :csv
+   */
+  public function iCheckThatTheTaxonomyTreeMatchesTheContentsOf($csv)
+  {
+    $csv = realpath(dirname(__FILE__) . '/../Resources/' . $csv);
+
+    // Export CSV of taxonomy tree.
+    $columns = dennis_term_manager_default_columns();
+
+    // Need to exclude some columns because they will be different on each site.
+    $exclude = array('path', 'tid', 'target_tid');
+    foreach ($exclude as $item) {
+      unset ($columns[array_search($item, $columns)]);
+    }
+    dennis_term_manager_export_terms(',', array('Category'), $columns, DENNIS_TERM_MANAGER_DESTINATION_FILE);
+
+    $destination = _dennis_term_manager_get_files_folder();
+    $exported_tree = drupal_realpath($destination) . '/taxonomy_export.csv';
+
+    // Compare exported CSV against the CSV saved on the repo.
+    // Pass tree must be contained inside the exported tree in order for the test to pass.
+    dennis_term_manager_diff($csv, $exported_tree);
+  }
+
 
   /**
    * @When term manager processes :arg1
