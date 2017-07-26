@@ -9,14 +9,11 @@ Feature: Term Manager
     Given I create a taxonomy tree using "test_create_run.csv"
     Then I check that the taxonomy tree matches the contents of "test_create_pass.csv"
 
-    When term manager processes "test_create_run.csv"
-    Then the term manager resulting tree should match "test_create_pass"
-
     When term manager processes "test_actions_run.csv"
-    Then the term manager resulting tree should match "test_actions_pass"
+    Then I check that the taxonomy tree matches the contents of "test_actions_pass.csv"
 
     When term manager processes dupe actions
-    Then the term manager resulting tree should match "test_dupe_actions_pass"
+    Then I check that the taxonomy tree matches the contents of "test_dupe_actions_pass.csv"
 
     Then I clean up the testing terms for term manager
 

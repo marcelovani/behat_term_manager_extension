@@ -34,6 +34,10 @@ class TermManagerContext implements SnippetAcceptingContext
 
     // Make sure term manager is enabled.
     variable_set('dennis_term_manager_enabled', 1);
+
+    // Initial cleanup of taxonomy tree and queue.
+    $this->taxonomyCleanup();
+    $this->queueCleanup('dennis_term_manager_queue');
   }
 
   /**
@@ -42,10 +46,6 @@ class TermManagerContext implements SnippetAcceptingContext
    * @param $file
    */
   private function batch($file) {
-    // Initial cleanup of taxonomy tree and queue.
-    $this->taxonomyCleanup();
-    $this->queueCleanup('dennis_term_manager_queue');
-
     $destination = _dennis_term_manager_get_files_folder();
 
     // Copy the CSV file into files folder.
@@ -53,7 +53,6 @@ class TermManagerContext implements SnippetAcceptingContext
 
     // Process the file.
     $batch = _dennis_term_manager_batch_init($file);
-
     // Tell Term Manager that the batch is being created by Behat extension.
     // Term Manager implements hook_batch_alter() to set progressive to FALSE.
     $batch['behat_extension'] = TRUE;
@@ -66,7 +65,6 @@ class TermManagerContext implements SnippetAcceptingContext
     // Process queue.
     //@todo this is not working
     //drupal_cron_run();
-
     $this->processQueue($file);
 
   }
@@ -182,21 +180,14 @@ class TermManagerContext implements SnippetAcceptingContext
     dennis_term_manager_diff($csv, $exported_tree);
   }
 
-
   /**
-   * @When term manager processes :arg1
+   * @When term manager processes :csv
    */
-  public function termManagerProcesses($arg1)
+  public function termManagerProcesses($csv)
   {
-    //throw new PendingException();
-  }
+    $file = realpath(dirname(__FILE__) . '/../Resources/' . $csv);
 
-  /**
-   * @Then the term manager resulting tree should match :arg1
-   */
-  public function theTermManagerResultingTreeShouldMatch($arg1)
-  {
-    //throw new PendingException();
+    $this->batch($file);
   }
 
   /**
@@ -204,7 +195,7 @@ class TermManagerContext implements SnippetAcceptingContext
    */
   public function termManagerProcessesDupeActions()
   {
-    //throw new PendingException();
+
   }
 
   /**
@@ -212,6 +203,7 @@ class TermManagerContext implements SnippetAcceptingContext
    */
   public function iCleanUpTheTestingTermsForTermManager()
   {
-    //throw new PendingException();
+
   }
+
 }
