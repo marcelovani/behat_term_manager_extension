@@ -37,27 +37,6 @@ class TermManagerContext implements SnippetAcceptingContext
   }
 
   /**
-   * Helper to clean up terms created during tests.
-   */
-  private function taxonomyCleanup() {
-    // Delete terms created during tests.
-    $term = taxonomy_get_term_by_name('Temp', 'category');
-    if ($term = reset($term)) {
-      taxonomy_term_delete($term->tid);
-    }
-
-    $term = taxonomy_get_term_by_name('TM-Fruits', 'category');
-    if ($term = reset($term)) {
-      taxonomy_term_delete($term->tid);
-    }
-
-    $term = taxonomy_get_term_by_name('TM-Fruits2', 'category');
-    if ($term = reset($term)) {
-      taxonomy_term_delete($term->tid);
-    }
-  }
-
-  /**
    * Batch processing.
    *
    * @param $file
@@ -92,6 +71,11 @@ class TermManagerContext implements SnippetAcceptingContext
 
   }
 
+  /**
+   * Processes the queue.
+   *
+   * @param $file
+   */
   private function processQueue($file) {
     // Process the queue.
     foreach (dennis_term_manager_cron_queue_info() as $queue_name => $info) {
@@ -138,6 +122,27 @@ class TermManagerContext implements SnippetAcceptingContext
       db_delete('batch')
         ->condition('bid', $batch['id'])
         ->execute();
+    }
+  }
+
+  /**
+   * Helper to clean up terms created during tests.
+   */
+  private function taxonomyCleanup() {
+    // Delete terms created during tests.
+    $term = taxonomy_get_term_by_name('Temp', 'category');
+    if ($term = reset($term)) {
+      taxonomy_term_delete($term->tid);
+    }
+
+    $term = taxonomy_get_term_by_name('TM-Fruits', 'category');
+    if ($term = reset($term)) {
+      taxonomy_term_delete($term->tid);
+    }
+
+    $term = taxonomy_get_term_by_name('TM-Fruits2', 'category');
+    if ($term = reset($term)) {
+      taxonomy_term_delete($term->tid);
     }
   }
 
