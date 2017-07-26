@@ -29,4 +29,4 @@ See examples of tests in https://github.com/dennisinteractive/behat_term_manager
 - Behat
 - Symfony DPI
 - Mink
-- Term Manager https://github.com/dennisinteractive/dennis_term_manager
+- Term Manager 2.x https://github.com/dennisinteractive/dennis_term_manager
