@@ -30,12 +30,37 @@ class TermManagerContext implements SnippetAcceptingContext
     //$this->BDDCommonContext = $environment->getContext('Behat\BDDCommonExtension\Context\BDDCommonContext');
     //$this->MinkContext = $environment->getContext('Drupal\DrupalExtension\Context\MinkContext');
     $this->drupalContext = $environment->getContext('Drupal\DrupalExtension\Context\DrupalContext');
+    $this->drupalContext->getDriver('drupal')->getCore()->bootstrap();
+
+    // Make sure term manager is enabled.
+    variable_set('dennis_term_manager_enabled', 1);
   }
 
   public function __construct() {
 
     // Bootstrap drupal.
     //$this->getDriver()->getCore()->bootstrap();
+  }
+
+  /**
+   * Helper to clean up terms created during tests.
+   */
+  private function taxonomyCleanup() {
+    // Delete terms created during tests.
+    $term = taxonomy_get_term_by_name('Temp', 'category');
+    if ($term = reset($term)) {
+      taxonomy_term_delete($term->tid);
+    }
+
+    $term = taxonomy_get_term_by_name('TM-Fruits', 'category');
+    if ($term = reset($term)) {
+      taxonomy_term_delete($term->tid);
+    }
+
+    $term = taxonomy_get_term_by_name('TM-Fruits2', 'category');
+    if ($term = reset($term)) {
+      taxonomy_term_delete($term->tid);
+    }
   }
 
   /**
@@ -46,9 +71,9 @@ class TermManagerContext implements SnippetAcceptingContext
   private function batch($file) {
     $this->drupalContext->getDriver('drupal')->getCore()->bootstrap();
 
-    // Initial cleanup of taxonomy tree.
-    //@todo see log. dont use _ function
-    _dennis_term_manager_cleanup();
+    // Initial cleanup of taxonomy tree and queue.
+    $this->taxonomyCleanup();
+    $this->queueCleanup('dennis_term_manager_queue');
 
     $destination = _dennis_term_manager_get_files_folder();
 
@@ -68,8 +93,47 @@ class TermManagerContext implements SnippetAcceptingContext
     $this->batchCleanup($batch);
 
     // Process queue.
-    drupal_cron_run();
+    //@todo this is not working
+    //drupal_cron_run();
 
+    $this->processQueue($file);
+
+  }
+
+  private function processQueue($file) {
+    // Process the queue.
+    foreach (dennis_term_manager_cron_queue_info() as $queue_name => $info) {
+      $function = $info['worker callback'];
+      if ($queue = \DrupalQueue::get($queue_name)) {
+        while ($item = $queue->claimItem()) {
+          $function($item->data);
+          $queue->deleteItem($item);
+        }
+      }
+    }
+
+    $date = date('Y-m-d_H-i-s', REQUEST_TIME);
+    $errors_file = preg_replace("/(.*)[.](.*)/", "$1-$date-errors.$2", $file->uri);
+    $dry_run_file = preg_replace("/(.*)[.](.*)/", "$1-$date-dry_run.$2", $file->uri);
+    $report_file = preg_replace("/(.*)[.](.*)/", "$1-$date-report.txt", $file->uri);
+
+    // Test that file with errors doesn't exist.
+    if (file_exists($errors_file)) {
+      throw new Exception(t('There were errors during execution, see !file_name for more details', array(
+        '!file_name' => $errors_file,
+      )));
+    }
+  }
+
+  /**
+   * Cleans queue table.
+   *
+   * @param $batch
+   */
+  private function queueCleanup($name) {
+    db_delete('queue')
+      ->condition('name', $name)
+      ->execute();
   }
 
   /**
@@ -78,9 +142,11 @@ class TermManagerContext implements SnippetAcceptingContext
    * @param $batch
    */
   private function batchCleanup($batch) {
-    db_delete('batch')
-      ->condition('bid', $batch['id'])
-      ->execute();
+    if (!empty($batch['id'])) {
+      db_delete('batch')
+        ->condition('bid', $batch['id'])
+        ->execute();
+    }
   }
 
   /**
