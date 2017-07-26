@@ -39,14 +39,60 @@ class TermManagerContext implements SnippetAcceptingContext
   }
 
   /**
+   * Batch processing.
+   *
+   * @param $file
+   */
+  private function batch($file) {
+    $this->drupalContext->getDriver('drupal')->getCore()->bootstrap();
+
+    // Initial cleanup of taxonomy tree.
+    //@todo see log. dont use _ function
+    _dennis_term_manager_cleanup();
+
+    $destination = _dennis_term_manager_get_files_folder();
+
+    // Copy the CSV file into files folder.
+    $file = _dennis_term_manager_file_copy($file, $destination);
+
+    // Process the file.
+    $batch = _dennis_term_manager_batch_init($file);
+
+    // Tell Term Manager that the batch is being created by Behat extension.
+    // Term Manager implements hook_batch_alter() to set progressive to FALSE.
+    $batch['behat_extension'] = TRUE;
+
+    // Process batch to queue up operations.
+    batch_set($batch);
+    batch_process();
+    $this->batchCleanup($batch);
+
+    // Process queue.
+    drupal_cron_run();
+
+  }
+
+  /**
+   * Cleans batch table.
+   *
+   * @param $batch
+   */
+  private function batchCleanup($batch) {
+    db_delete('batch')
+      ->condition('bid', $batch['id'])
+      ->execute();
+  }
+
+  /**
    * @Given I create a taxonomy tree for testing term manager
    */
   public function iCreateATaxonomyTreeForTestingTermManager()
   {
-    $this->drupalContext->getDriver('drupal')->getCore()->bootstrap();
-    //print_r(get_class_methods($this->drupalContext->getDriver()));
+    $csv = 'test_create_run.csv';
+    $file = realpath(dirname(__FILE__) . '/../Resources/' . $csv);
 
-    dennis_term_manager_tests_create();
+    $this->batch($file);
+
   }
 
   /**
